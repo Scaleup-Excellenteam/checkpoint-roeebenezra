@@ -10,14 +10,12 @@
 #define NUM_LEVELS 12
 #define NUM_CLASSES 10
 
-#define MAX_LINE_LENGTH 128
+#define MAX_LINE_LENGTH 80
 
 struct Course {
     char _course_name[NAME_LEN];
     int _grade;
     bool is_register;
-//    struct Course* _next;
-//    struct Course* _prev;
 };
 
 struct Student {
@@ -44,23 +42,32 @@ struct School {
     struct Level levels[NUM_LEVELS];
 };
 
-
-int main() {
-    FILE *fptr;
-    char *line = NULL;
-
+void open_file(FILE *fptr) {
     // Open a file in read mode
     fptr = fopen("/Users/roeebenezra/CLionProjects/Checkpoint/students_with_class.txt", "r");
     if (fptr == NULL) {
-        printf("file ptr in null");
+        printf("file isn't opened");
         exit(EXIT_FAILURE);
-    } else {
-        printf("file is open");
     }
+}
+
+static struct School school_system;
+
+int main() {
+    FILE *fptr = NULL;
+    char line[MAX_LINE_LENGTH] = {0};
+
+    open_file(fptr);
 
     while (fgets(line, MAX_LINE_LENGTH, fptr)) {
-        printf("Retrieved line of length %zu:\n", strlen(line));
         printf("%s", line);
+        char *filed = strtok(line, " ");
+
+        // loop through the string to extract all others tokens
+        while (filed != NULL) {
+            printf(" %s\n", filed); //printing each token
+            filed = strtok(NULL, " ");
+        }
     }
 
     fclose(fptr);
