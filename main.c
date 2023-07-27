@@ -26,17 +26,14 @@ struct Student {
     int _class_number;
     int _class_level;
     struct Student *_next;
-//    struct Student *_prev;
 };
 
 struct Class {
-    int _class_number;
     struct Student *_head_stud_list;
     struct Student *_tail_stud_list;
 };
 
 struct Level {
-    int _class_level;
     struct Class _classes[NUM_CLASSES];
 };
 
@@ -46,8 +43,12 @@ struct School {
 
 
 FILE *open_file();
+
 void INITDB(FILE *);
+
 void printDB();
+
+void freePTRsDB();
 
 
 static struct School school_system;
@@ -58,6 +59,8 @@ int main() {
     INITDB(fptr);
     printDB();
 
+    freePTRsDB();
+
     fclose(fptr);
 
     return 0;
@@ -67,31 +70,34 @@ int main() {
 // Open file function
 FILE *open_file() {
     // Open a file in read mode
-    FILE *fptr = fopen("/Users/roeebenezra/CLionProjects/Checkpoint/students_with_class.txt", "r");
+    FILE *fptr = fopen("/cs/stud/roibe/Desktop/students_with_class.txt", "r");
     if (fptr == NULL) {
         printf("file isn't opened");
         exit(EXIT_FAILURE);
     }
+
     return fptr;
 }
 
 
 // Init DB function
-void INITDB(FILE *fptr){
-    char line[MAX_LINE_LENGTH];
+void INITDB(FILE *fptr) {
+    char line[MAX_LINE_LENGTH] = {0};
+    char *filed = NULL;
+    struct Student *stud = NULL;
+    char student_data[15][MAX_INP_LENGTH] = {{0}};
 
     while (fgets(line, MAX_LINE_LENGTH, fptr)) {
-        char *student_data[15];
-        char *filed = strtok(line, " ");
+        filed = strtok(line, " ");
         // loop through the string to extract all others tokens
 
         for (int i = 0; filed != NULL; i++) {
-            student_data[i] = malloc(strlen(filed) + 1);
-            student_data[i] = filed;
+            strcpy(student_data[i], filed);
             filed = strtok(NULL, " ");
         }
 
-        struct Student *stud = malloc(sizeof(struct Student));
+        stud = malloc(sizeof(struct Student));
+        stud->_next = NULL;
         for (int i = 0, j = 5; i < NUM_COURSES; i++, j++) {
             int grade = atoi(student_data[j]);
             struct Course c = {"CourseName", grade, false};
@@ -120,16 +126,36 @@ void INITDB(FILE *fptr){
 }
 
 // print DB func
-void printDB(){
-    for (int i = 0; i < NUM_LEVELS ; i++) {
-        for (int j = 0; j < NUM_CLASSES ; j++) {
-            struct Student *s = school_system._levels[i]._classes[j]._head_stud_list;
+void printDB() {
+    struct Student *s = NULL;
+
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        for (int j = 0; j < NUM_CLASSES; j++) {
+            s = school_system._levels[i]._classes[j]._head_stud_list;
             while (s) {
-                printf("%s %s %s %d %d ", s->_first_name, s->_last_name, s->_phone_number, s->_class_level, s->_class_number);
-                for(int k = 0 ; k < NUM_COURSES; k++)
+                printf("%s %s %s %d %d ", s->_first_name, s->_last_name, s->_phone_number, s->_class_level,
+                       s->_class_number);
+                for (int k = 0; k < NUM_COURSES; k++)
                     printf("%d ", s->_courses_list[k]._grade);
                 printf("\n");
                 s = s->_next;
+            }
+        }
+    }
+}
+
+// free memory in DB func
+void freePTRsDB() {
+    struct Student *s = NULL;
+    struct Student *temp = NULL;
+
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        for (int j = 0; j < NUM_CLASSES; j++) {
+            s = school_system._levels[i]._classes[j]._head_stud_list;
+            while (s) {
+                temp = s;
+                s = s->_next;
+                free(temp);
             }
         }
     }
