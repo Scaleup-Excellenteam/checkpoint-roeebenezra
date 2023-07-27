@@ -4,13 +4,13 @@
 #include <string.h>
 
 #define NAME_LEN 32
-#define PHONE_LEN 24
 
 #define NUM_COURSES 10
 #define NUM_LEVELS 12
 #define NUM_CLASSES 10
 
 #define MAX_LINE_LENGTH 80
+#define MAX_LENGTH 50
 
 struct Course {
     char _course_name[NAME_LEN];
@@ -19,9 +19,9 @@ struct Course {
 };
 
 struct Student {
-    char *_first_name;
-    char *_last_name;
-    char *_phone_number;
+    char _first_name[MAX_LENGTH];
+    char _last_name[MAX_LENGTH];
+    char _phone_number[11];
     struct Course _courses_list[NUM_COURSES];
     int _class_number;
     int _class_level;
@@ -74,20 +74,38 @@ int main() {
             filed = strtok(NULL, " ");
         }
 
-        struct Student stud;
+        struct Student *stud = malloc(sizeof(struct Student));
         for (int i = 0, j = 4; i < NUM_COURSES; i++, j++) {
             int grade = atoi(student_data[j]);
             struct Course c = {"CourseName", grade, false};
-            stud._courses_list[i] = c;
+            stud->_courses_list[i] = c;
         }
 
-        stud._first_name = malloc(strlen(student_data[0]));
-        strcpy(stud._first_name, student_data[0]);
-        stud._last_name = malloc(strlen(student_data[1]));
-        strcpy(stud._last_name, student_data[1]);
-        stud._phone_number = malloc(strlen(student_data[2]));
-        strcpy(stud._phone_number, student_data[2]);
+        strcpy(stud->_first_name, student_data[0]);
+        strcpy(stud->_last_name, student_data[1]);
+        strcpy(stud->_phone_number, student_data[2]);
+        stud->_class_level = atoi(student_data[3]);
+        stud->_class_number = atoi(student_data[4]);
 
+        struct Student **class_head = &school_system._levels[stud->_class_level - 1]._classes[stud->_class_number - 1]._head_stud_list;
+        struct Student **class_tail = &school_system._levels[stud->_class_level - 1]._classes[stud->_class_number - 1]._tail_stud_list;
+
+        if (*class_head) {
+            (*class_tail)->_next = stud;
+            *class_tail = stud;
+        } else {
+            *class_head = stud;
+            *class_tail = *class_head;
+        }
+
+    }
+
+    // print db
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        for (int j = 0; j < NUM_CLASSES; j++) {
+            if (school_system._levels[i]._classes[j]._head_stud_list)
+                printf("%s", school_system._levels[i]._classes[j]._head_stud_list->_first_name);
+        }
     }
 
     fclose(fptr);
