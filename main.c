@@ -70,7 +70,9 @@ void topStudentsByLevel();
 
 void potentialDropouts();
 
-void calculateAveragePerCourse();
+float calculateAveragePerCourse(int course_index);
+
+void AverageOfCourses();
 
 void exportToCSV();
 
@@ -127,7 +129,7 @@ void menuDB() {
                 potentialDropouts();
                 break;
             case 7:
-                calculateAveragePerCourse();
+                AverageOfCourses();
                 break;
             case 8:
                 exportToCSV();
@@ -413,7 +415,7 @@ float calculateOverallAverage(const struct Student *student) {
     for (int i = 0; i < NUM_COURSES; i++)
         total_grades += student->_courses_list[i]._grade;
 
-    return (float) total_grades / NUM_COURSES ;
+    return (float) total_grades / NUM_COURSES;
 }
 
 // Function to find the top-performing students in each level
@@ -477,13 +479,14 @@ void potentialDropouts() {
     for (i = 0; i < NUM_LEVELS; i++) {
         printf("Potential Dropouts in Level %d:\n", i + 1);
 
-        struct Student* potential_dropouts[NUM_POTENTIAL_DROPOUTS] = { NULL };
-        float potential_dropout_averages[NUM_POTENTIAL_DROPOUTS] = { 100.0 }; // Initialize with highest possible grade (100)
+        struct Student *potential_dropouts[NUM_POTENTIAL_DROPOUTS] = {NULL};
+        float potential_dropout_averages[NUM_POTENTIAL_DROPOUTS] = {
+                100.0}; // Initialize with highest possible grade (100)
 
         // Traverse through all classes in the current level
         for (j = 0; j < NUM_CLASSES; j++) {
-            struct Class* class = &(school_system._levels[i]._classes[j]);
-            struct Student* curr_student = class->_head_stud_list;
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
 
             // Traverse all students in the class
             while (curr_student != NULL) {
@@ -513,7 +516,8 @@ void potentialDropouts() {
         // Display the potential dropouts for the current level
         for (int k = 0; k < NUM_POTENTIAL_DROPOUTS; k++) {
             if (potential_dropouts[k] != NULL) {
-                printf("%d. %s %s (Average Grade: %.2f)\n", k + 1, potential_dropouts[k]->_first_name, potential_dropouts[k]->_last_name, potential_dropout_averages[k]);
+                printf("%d. %s %s (Average Grade: %.2f)\n", k + 1, potential_dropouts[k]->_first_name,
+                       potential_dropouts[k]->_last_name, potential_dropout_averages[k]);
             }
         }
 
@@ -522,9 +526,39 @@ void potentialDropouts() {
 }
 
 
-void calculateAveragePerCourse() {
-    // Implement code to calculate the average per course
-    printf("Calculating average per course...\n");
+// Function to calculate the average grade for a specific course across all students
+float calculateAveragePerCourse(int course_index) {
+    int total_grades = 0;
+    int num_students = 0;
+
+    // Traverse through all levels and classes
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        for (int j = 0; j < NUM_CLASSES; j++) {
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
+
+            // Traverse all students in the class
+            while (curr_student != NULL) {
+                // Check if the student is registered for the specific course
+                total_grades += curr_student->_courses_list[course_index]._grade;
+                num_students++;
+
+                curr_student = curr_student->_next;
+            }
+        }
+    }
+
+    return num_students > 0 ? (float) total_grades / num_students : 0.0;
+}
+
+
+// Calculate the average for each course
+void AverageOfCourses() {
+    printf("Average Grade for Each Course:\n");
+    for (int i = 0; i < NUM_COURSES; i++) {
+        printf("Course %d: %.2f\n", i + 1, calculateAveragePerCourse(i));
+    }
+
 }
 
 void exportToCSV() {
