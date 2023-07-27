@@ -8,6 +8,7 @@
 #define NUM_COURSES 10
 #define NUM_LEVELS 12
 #define NUM_CLASSES 10
+#define NUM_TOP_STUDENTS 10
 
 #define MAX_LINE_LENGTH 80
 #define MAX_INP_LENGTH 50
@@ -62,7 +63,9 @@ void updateStudentInfo();
 
 void searchStudent();
 
-void topStudentsByCourse();
+float calculateOverallAverage(const struct Student *student);
+
+void topStudentsByLevel();
 
 void potentialDropouts();
 
@@ -95,7 +98,7 @@ void menuDB() {
         printf("2. Delete student\n");
         printf("3. Update student information\n");
         printf("4. Search student\n");
-        printf("5. Top students by course\n");
+        printf("5. Top students in each level\n");
         printf("6. Potential dropouts\n");
         printf("7. Calculate average per course\n");
         printf("8. Export to CSV\n");
@@ -117,7 +120,7 @@ void menuDB() {
                 searchStudent();
                 break;
             case 5:
-                topStudentsByCourse();
+                topStudentsByLevel();
                 break;
             case 6:
                 potentialDropouts();
@@ -152,7 +155,7 @@ int convertToInt(const char *str) {
 
 
 // Function to add a new student to the school db
-void addNewStudent(struct School *school) {
+void addNewStudent() {
     char first_name[MAX_INP_LENGTH];
     char last_name[MAX_INP_LENGTH];
     char phone_number[11];
@@ -401,10 +404,68 @@ void searchStudent() {
     }
 }
 
+// Function to calculate the overall average grade for a student
+float calculateOverallAverage(const struct Student *student) {
+    int total_grades = 0;
+    int num_registered_courses = 0;
 
-void topStudentsByCourse() {
-    // Implement code to find the top students by course
-    printf("Top students by course...\n");
+    for (int i = 0; i < NUM_COURSES; i++)
+        total_grades += student->_courses_list[i]._grade;
+
+    return (float) total_grades / NUM_COURSES ;
+}
+
+// Function to find the top-performing students in each level
+void topStudentsByLevel() {
+    int i, j;
+
+    // Traverse through all levels
+    for (i = 0; i < NUM_LEVELS; i++) {
+        printf("Top 10 students in Level %d:\n", i + 1);
+
+        struct Student *top_students[NUM_TOP_STUDENTS] = {NULL};
+        float top_student_averages[NUM_TOP_STUDENTS] = {0.0};
+
+        // Traverse through all classes in the current level
+        for (j = 0; j < NUM_CLASSES; j++) {
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
+
+            // Traverse all students in the class
+            while (curr_student != NULL) {
+                float avg = calculateOverallAverage(curr_student);
+
+                // Compare the student's average with the current top students
+                for (int k = 0; k < NUM_TOP_STUDENTS; k++) {
+                    if (avg > top_student_averages[k]) {
+                        // Shift the current top students to make space for the new student
+                        for (int l = NUM_TOP_STUDENTS - 1; l > k; l--) {
+                            top_students[l] = top_students[l - 1];
+                            top_student_averages[l] = top_student_averages[l - 1];
+                        }
+
+                        // Insert the new student in the top list
+                        top_students[k] = curr_student;
+                        top_student_averages[k] = avg;
+
+                        break;
+                    }
+                }
+
+                curr_student = curr_student->_next;
+            }
+        }
+
+        // Display the top students for the current level
+        for (int k = 0; k < NUM_TOP_STUDENTS; k++) {
+            if (top_students[k] != NULL) {
+                printf("%d. %s %s (Average Grade: %.2f)\n", k + 1, top_students[k]->_first_name,
+                       top_students[k]->_last_name, top_student_averages[k]);
+            }
+        }
+
+        printf("\n");
+    }
 }
 
 void potentialDropouts() {
