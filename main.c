@@ -9,6 +9,7 @@
 #define NUM_LEVELS 12
 #define NUM_CLASSES 10
 #define NUM_TOP_STUDENTS 10
+#define NUM_POTENTIAL_DROPOUTS 10
 
 #define MAX_LINE_LENGTH 80
 #define MAX_INP_LENGTH 50
@@ -468,10 +469,58 @@ void topStudentsByLevel() {
     }
 }
 
+// Function to find the potential dropouts (lowest 10 students) in each level
 void potentialDropouts() {
-    // Implement code to find potential dropouts based on parameters
-    printf("Potential dropouts...\n");
+    int i, j;
+
+    // Traverse through all levels
+    for (i = 0; i < NUM_LEVELS; i++) {
+        printf("Potential Dropouts in Level %d:\n", i + 1);
+
+        struct Student* potential_dropouts[NUM_POTENTIAL_DROPOUTS] = { NULL };
+        float potential_dropout_averages[NUM_POTENTIAL_DROPOUTS] = { 100.0 }; // Initialize with highest possible grade (100)
+
+        // Traverse through all classes in the current level
+        for (j = 0; j < NUM_CLASSES; j++) {
+            struct Class* class = &(school_system._levels[i]._classes[j]);
+            struct Student* curr_student = class->_head_stud_list;
+
+            // Traverse all students in the class
+            while (curr_student != NULL) {
+                float avg = calculateOverallAverage(curr_student);
+
+                // Compare the student's average with the current potential dropouts
+                for (int k = 0; k < NUM_POTENTIAL_DROPOUTS; k++) {
+                    if (avg < potential_dropout_averages[k]) {
+                        // Shift the current potential dropouts to make space for the new student
+                        for (int l = NUM_POTENTIAL_DROPOUTS - 1; l > k; l--) {
+                            potential_dropouts[l] = potential_dropouts[l - 1];
+                            potential_dropout_averages[l] = potential_dropout_averages[l - 1];
+                        }
+
+                        // Insert the new student in the potential dropouts list
+                        potential_dropouts[k] = curr_student;
+                        potential_dropout_averages[k] = avg;
+
+                        break;
+                    }
+                }
+
+                curr_student = curr_student->_next;
+            }
+        }
+
+        // Display the potential dropouts for the current level
+        for (int k = 0; k < NUM_POTENTIAL_DROPOUTS; k++) {
+            if (potential_dropouts[k] != NULL) {
+                printf("%d. %s %s (Average Grade: %.2f)\n", k + 1, potential_dropouts[k]->_first_name, potential_dropouts[k]->_last_name, potential_dropout_averages[k]);
+            }
+        }
+
+        printf("\n");
+    }
 }
+
 
 void calculateAveragePerCourse() {
     // Implement code to calculate the average per course
