@@ -304,12 +304,13 @@ void updateStudentInfo() {
     // Traverse through all levels, classes, and students to find the student
     for (i = 0; i < NUM_LEVELS; i++) {
         for (j = 0; j < NUM_CLASSES; j++) {
-            struct Class* class = &(school_system._levels[i]._classes[j]);
-            struct Student* curr_student = class->_head_stud_list;
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
 
             while (curr_student != NULL) {
                 // Compare the first name and last name of the current student with the target names
-                if (strcmp(curr_student->_first_name, first_name) == 0 && strcmp(curr_student->_last_name, last_name) == 0) {
+                if (strcmp(curr_student->_first_name, first_name) == 0 &&
+                    strcmp(curr_student->_last_name, last_name) == 0) {
                     student_found = true;
 
                     // Prompt the user for the updated information
@@ -344,10 +345,62 @@ void updateStudentInfo() {
     }
 }
 
+// Function to search for a student in the school data structure
 void searchStudent() {
-    // Implement code to search for a student and display their information
-    printf("Searching for a student...\n");
+    int i, j;
+    bool student_found = false;
+
+    char first_name[MAX_INP_LENGTH];
+    char last_name[MAX_INP_LENGTH];
+
+    printf("Enter the first name of the student to search: ");
+    scanf("%s", first_name);
+
+    printf("Enter the last name of the student to search: ");
+    scanf("%s", last_name);
+
+    // Traverse through all levels, classes, and students to find the student
+    for (i = 0; i < NUM_LEVELS; i++) {
+        for (j = 0; j < NUM_CLASSES; j++) {
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
+
+            while (curr_student != NULL) {
+                // Compare the first name and last name of the current student with the target names
+                if (strcmp(curr_student->_first_name, first_name) == 0 &&
+                    strcmp(curr_student->_last_name, last_name) == 0) {
+                    student_found = true;
+
+                    // Display the student's information
+                    printf("Student Found:\n");
+                    printf("First Name: %s\n", curr_student->_first_name);
+                    printf("Last Name: %s\n", curr_student->_last_name);
+                    printf("Phone Number: %s\n", curr_student->_phone_number);
+                    printf("Class Number: %d\n", curr_student->_class_number);
+                    printf("Class Level: %d\n", curr_student->_class_level);
+                    printf("\n");
+
+                    break;
+                }
+
+                curr_student = curr_student->_next;
+            }
+
+            if (student_found) {
+                break;
+            }
+        }
+
+        if (student_found) {
+            break;
+        }
+    }
+
+    if (!student_found) {
+        printf("Student not found in the database.\n");
+    }
 }
+
 
 void topStudentsByCourse() {
     // Implement code to find the top students by course
