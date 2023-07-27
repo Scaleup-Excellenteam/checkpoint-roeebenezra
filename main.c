@@ -85,7 +85,7 @@ int main() {
     return 0;
 }
 
-
+// User actions in db
 void menuDB() {
     int choice;
 
@@ -137,6 +137,7 @@ void menuDB() {
     }
 }
 
+
 // Function to convert a string to an integer using strtol
 int convertToInt(const char *str) {
     char *endptr;
@@ -150,7 +151,7 @@ int convertToInt(const char *str) {
 }
 
 
-// Function to add a new student to the school data structure
+// Function to add a new student to the school db
 void addNewStudent(struct School *school) {
     char first_name[MAX_INP_LENGTH];
     char last_name[MAX_INP_LENGTH];
@@ -216,6 +217,7 @@ void addNewStudent(struct School *school) {
 }
 
 
+// Function to delete a student to the school db
 void deleteStudent() {
     // Test the deleteStudent function
     char first_name[MAX_INP_LENGTH];
@@ -283,9 +285,63 @@ void deleteStudent() {
 
 }
 
+
+// Function to update a student's information in the school data structure
 void updateStudentInfo() {
-    // Implement code to update student information
-    printf("Updating student information...\n");
+    int i, j;
+    bool student_found = false;
+
+    char first_name[MAX_INP_LENGTH];
+    char last_name[MAX_INP_LENGTH];
+
+    printf("Enter the first name of the student to update: ");
+    scanf("%s", first_name);
+
+    printf("Enter the last name of the student to update: ");
+    scanf("%s", last_name);
+
+
+    // Traverse through all levels, classes, and students to find the student
+    for (i = 0; i < NUM_LEVELS; i++) {
+        for (j = 0; j < NUM_CLASSES; j++) {
+            struct Class* class = &(school_system._levels[i]._classes[j]);
+            struct Student* curr_student = class->_head_stud_list;
+
+            while (curr_student != NULL) {
+                // Compare the first name and last name of the current student with the target names
+                if (strcmp(curr_student->_first_name, first_name) == 0 && strcmp(curr_student->_last_name, last_name) == 0) {
+                    student_found = true;
+
+                    // Prompt the user for the updated information
+                    printf("Enter updated phone number: ");
+                    scanf("%s", curr_student->_phone_number);
+
+                    printf("Enter updated class number: ");
+                    scanf("%d", &curr_student->_class_number);
+
+                    printf("Enter updated class level: ");
+                    scanf("%d", &curr_student->_class_level);
+
+                    printf("Student information updated successfully!\n");
+                    break;
+                }
+
+                curr_student = curr_student->_next;
+            }
+
+            if (student_found) {
+                break;
+            }
+        }
+
+        if (student_found) {
+            break;
+        }
+    }
+
+    if (!student_found) {
+        printf("Student not found in the database.\n");
+    }
 }
 
 void searchStudent() {
