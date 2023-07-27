@@ -48,6 +48,7 @@ void menuDB();
 void freePTRsDB();
 
 void addNewStudent();
+int convertToInt(const char* str);
 void deleteStudent();
 void updateStudentInfo();
 void searchStudent();
@@ -123,14 +124,147 @@ void menuDB() {
     }
 }
 
-void addNewStudent() {
-    // Implement code to add a new student to the database
-    printf("Adding a new student...\n");
+// Function to convert a string to an integer using strtol
+int convertToInt(const char* str) {
+    char* endptr;
+    long int num = strtol(str, &endptr, 10);
+
+    if (*endptr != '\0') {
+        return -1; // Conversion error
+    }
+
+    return (int)num;
 }
 
+
+// Function to add a new student to the school data structure
+void addNewStudent(struct School* school) {
+    char first_name[MAX_INP_LENGTH];
+    char last_name[MAX_INP_LENGTH];
+    char phone_number[11];
+    char class_number_str[5];
+    char class_level_str[5];
+
+    // Input student details
+    printf("Enter first name (without spaces): ");
+    scanf("%s", first_name);
+
+    printf("Enter last name (without spaces): ");
+    scanf("%s", last_name);
+
+    printf("Enter phone number: ");
+    scanf("%s", phone_number);
+
+    printf("Enter class number: ");
+    scanf("%s", class_number_str);
+
+    printf("Enter class level: ");
+    scanf("%s", class_level_str);
+
+    // Convert class number and level to integers
+    int class_number = convertToInt(class_number_str);
+    int class_level = convertToInt(class_level_str);
+
+    // Check for conversion errors
+    if (class_number == -1 || class_level == -1) {
+        printf("Invalid class level or number.\n");
+        return;
+    }
+    // Check for valid class level and number
+    if (class_level < 1 || class_level > NUM_LEVELS || class_number < 1 || class_number > NUM_CLASSES) {
+        printf("Invalid class level or number.\n");
+        return;
+    }
+
+    // Create a new student
+    struct Student* new_student = (struct Student*)malloc(sizeof(struct Student));
+    strcpy(new_student->_first_name, first_name);
+    strcpy(new_student->_last_name, last_name);
+    strcpy(new_student->_phone_number, phone_number);
+    new_student->_class_number = class_number;
+    new_student->_class_level = class_level;
+    new_student->_next = NULL;
+
+    // Add the student to the appropriate class
+    struct Level* level = &(school->_levels[class_level - 1]);
+    struct Class* class = &(level->_classes[class_number - 1]);
+
+    if (class->_head_stud_list == NULL) {
+        class->_head_stud_list = new_student;
+        class->_tail_stud_list = new_student;
+    } else {
+        class->_tail_stud_list->_next = new_student;
+        class->_tail_stud_list = new_student;
+    }
+
+    printf("New student added successfully!\n");
+}
+
+
 void deleteStudent() {
-    // Implement code to delete a student from the database
-    printf("Deleting a student...\n");
+    // Test the deleteStudent function
+    char first_name[MAX_INP_LENGTH];
+    char last_name[MAX_INP_LENGTH];
+
+    printf("Enter the first name of the student to delete: ");
+    scanf("%s", first_name);
+
+    printf("Enter the last name of the student to delete: ");
+    scanf("%s", last_name);
+
+    int i, j;
+    bool student_found = false;
+
+    // Traverse through all levels, classes, and students to find the student
+    for (i = 0; i < NUM_LEVELS; i++) {
+        for (j = 0; j < NUM_CLASSES; j++) {
+            struct Class* class = &(school_system._levels[i]._classes[j]);
+            struct Student* curr_student = class->_head_stud_list;
+            struct Student* prev_student = NULL;
+
+            while (curr_student != NULL) {
+                // Compare the first name and last name of the current student with the target names
+                if (strcmp(curr_student->_first_name, first_name) == 0 && strcmp(curr_student->_last_name, last_name) == 0) {
+                    student_found = true;
+
+                    // If the student is the head of the linked list
+                    if (prev_student == NULL) {
+                        class->_head_stud_list = curr_student->_next;
+                    } else {
+                        prev_student->_next = curr_student->_next;
+                    }
+
+                    // If the student is the tail of the linked list
+                    if (curr_student == class->_tail_stud_list) {
+                        class->_tail_stud_list = prev_student;
+                    }
+
+                    // Free memory allocated for the student
+                    free(curr_student);
+                    curr_student = NULL;
+
+                    printf("Student deleted successfully!\n");
+                    break;
+                }
+
+                prev_student = curr_student;
+                curr_student = curr_student->_next;
+            }
+
+            if (student_found) {
+                break;
+            }
+        }
+
+        if (student_found) {
+            break;
+        }
+    }
+
+    if (!student_found) {
+        printf("Student not found in the database.\n");
+    }
+
 }
 
 void updateStudentInfo() {
