@@ -40,21 +40,34 @@ struct Level {
 struct School {
     struct Level _levels[NUM_LEVELS];
 };
+
 // Function prototypes
 FILE *open_file();
+
 void INITDB(FILE *);
+
 void printDB();
+
 void menuDB();
+
 void freePTRsDB();
 
 void addNewStudent();
-int convertToInt(const char* str);
+
+int convertToInt(const char *str);
+
 void deleteStudent();
+
 void updateStudentInfo();
+
 void searchStudent();
+
 void topStudentsByCourse();
+
 void potentialDropouts();
+
 void calculateAveragePerCourse();
+
 void exportToCSV();
 
 // static DB
@@ -125,20 +138,20 @@ void menuDB() {
 }
 
 // Function to convert a string to an integer using strtol
-int convertToInt(const char* str) {
-    char* endptr;
+int convertToInt(const char *str) {
+    char *endptr;
     long int num = strtol(str, &endptr, 10);
 
     if (*endptr != '\0') {
         return -1; // Conversion error
     }
 
-    return (int)num;
+    return (int) num;
 }
 
 
 // Function to add a new student to the school data structure
-void addNewStudent(struct School* school) {
+void addNewStudent(struct School *school) {
     char first_name[MAX_INP_LENGTH];
     char last_name[MAX_INP_LENGTH];
     char phone_number[11];
@@ -177,7 +190,7 @@ void addNewStudent(struct School* school) {
     }
 
     // Create a new student
-    struct Student* new_student = (struct Student*)malloc(sizeof(struct Student));
+    struct Student *new_student = (struct Student *) malloc(sizeof(struct Student));
     strcpy(new_student->_first_name, first_name);
     strcpy(new_student->_last_name, last_name);
     strcpy(new_student->_phone_number, phone_number);
@@ -186,15 +199,17 @@ void addNewStudent(struct School* school) {
     new_student->_next = NULL;
 
     // Add the student to the appropriate class
-    struct Level* level = &(school->_levels[class_level - 1]);
-    struct Class* class = &(level->_classes[class_number - 1]);
+    struct Student **class_head = &school_system._levels[new_student->_class_level - 1]._classes[
+            new_student->_class_number - 1]._head_stud_list;
+    struct Student **class_tail = &school_system._levels[new_student->_class_level - 1]._classes[
+            new_student->_class_number - 1]._tail_stud_list;
 
-    if (class->_head_stud_list == NULL) {
-        class->_head_stud_list = new_student;
-        class->_tail_stud_list = new_student;
+    if (*class_head) {
+        (*class_tail)->_next = new_student;
+        *class_tail = new_student;
     } else {
-        class->_tail_stud_list->_next = new_student;
-        class->_tail_stud_list = new_student;
+        *class_head = new_student;
+        *class_tail = *class_head;
     }
 
     printf("New student added successfully!\n");
@@ -218,13 +233,14 @@ void deleteStudent() {
     // Traverse through all levels, classes, and students to find the student
     for (i = 0; i < NUM_LEVELS; i++) {
         for (j = 0; j < NUM_CLASSES; j++) {
-            struct Class* class = &(school_system._levels[i]._classes[j]);
-            struct Student* curr_student = class->_head_stud_list;
-            struct Student* prev_student = NULL;
+            struct Class *class = &(school_system._levels[i]._classes[j]);
+            struct Student *curr_student = class->_head_stud_list;
+            struct Student *prev_student = NULL;
 
             while (curr_student != NULL) {
                 // Compare the first name and last name of the current student with the target names
-                if (strcmp(curr_student->_first_name, first_name) == 0 && strcmp(curr_student->_last_name, last_name) == 0) {
+                if (strcmp(curr_student->_first_name, first_name) == 0 &&
+                    strcmp(curr_student->_last_name, last_name) == 0) {
                     student_found = true;
 
                     // If the student is the head of the linked list
@@ -303,7 +319,7 @@ FILE *open_file() {
     // Open a file in read mode
     FILE *fptr = fopen("/Users/roeebenezra/CLionProjects/Checkpoint/students_with_class.txt", "r");
     if (fptr == NULL) {
-        printf("file isn't opened");
+        printf("file isn't opened\n");
         exit(EXIT_FAILURE);
     }
 
