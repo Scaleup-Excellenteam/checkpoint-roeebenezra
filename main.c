@@ -40,37 +40,134 @@ struct Level {
 struct School {
     struct Level _levels[NUM_LEVELS];
 };
-
-
+// Function prototypes
 FILE *open_file();
-
 void INITDB(FILE *);
-
 void printDB();
-
+void menuDB();
 void freePTRsDB();
 
+void addNewStudent();
+void deleteStudent();
+void updateStudentInfo();
+void searchStudent();
+void topStudentsByCourse();
+void potentialDropouts();
+void calculateAveragePerCourse();
+void exportToCSV();
 
+// static DB
 static struct School school_system;
 
 int main() {
     FILE *fptr = open_file();
 
     INITDB(fptr);
-    printDB();
-
+    menuDB();
+//    printDB();
     freePTRsDB();
-
     fclose(fptr);
 
     return 0;
 }
 
 
+void menuDB() {
+    int choice;
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Add new student\n");
+        printf("2. Delete student\n");
+        printf("3. Update student information\n");
+        printf("4. Search student\n");
+        printf("5. Top students by course\n");
+        printf("6. Potential dropouts\n");
+        printf("7. Calculate average per course\n");
+        printf("8. Export to CSV\n");
+        printf("9. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addNewStudent();
+                break;
+            case 2:
+                deleteStudent();
+                break;
+            case 3:
+                updateStudentInfo();
+                break;
+            case 4:
+                searchStudent();
+                break;
+            case 5:
+                topStudentsByCourse();
+                break;
+            case 6:
+                potentialDropouts();
+                break;
+            case 7:
+                calculateAveragePerCourse();
+                break;
+            case 8:
+                exportToCSV();
+                break;
+            case 9:
+                printf("Exiting the program.\n");
+                return;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+}
+
+void addNewStudent() {
+    // Implement code to add a new student to the database
+    printf("Adding a new student...\n");
+}
+
+void deleteStudent() {
+    // Implement code to delete a student from the database
+    printf("Deleting a student...\n");
+}
+
+void updateStudentInfo() {
+    // Implement code to update student information
+    printf("Updating student information...\n");
+}
+
+void searchStudent() {
+    // Implement code to search for a student and display their information
+    printf("Searching for a student...\n");
+}
+
+void topStudentsByCourse() {
+    // Implement code to find the top students by course
+    printf("Top students by course...\n");
+}
+
+void potentialDropouts() {
+    // Implement code to find potential dropouts based on parameters
+    printf("Potential dropouts...\n");
+}
+
+void calculateAveragePerCourse() {
+    // Implement code to calculate the average per course
+    printf("Calculating average per course...\n");
+}
+
+void exportToCSV() {
+    // Implement code to export the database to a CSV file
+    printf("Exporting to CSV...\n");
+}
+
+
 // Open file function
 FILE *open_file() {
     // Open a file in read mode
-    FILE *fptr = fopen("/cs/stud/roibe/Desktop/students_with_class.txt", "r");
+    FILE *fptr = fopen("/Users/roeebenezra/CLionProjects/Checkpoint/students_with_class.txt", "r");
     if (fptr == NULL) {
         printf("file isn't opened");
         exit(EXIT_FAILURE);
