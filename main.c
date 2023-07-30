@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+//#include <openssl/evp.h>
+//#include <openssl/rand.h>
 
 #define NAME_LEN 32
 
@@ -74,22 +76,134 @@ float calculateAveragePerCourse(int course_index);
 
 void AverageOfCourses();
 
-void exportToCSV();
+void exportToCSV(const char* filename);
+
+void encryptAndSave(const char* filename);
+
+void readAndDecrypt(const char* filename);
+
 
 // static DB
 static struct School school_system;
+
 
 int main() {
     FILE *fptr = open_file();
 
     INITDB(fptr);
-    menuDB();
 //    printDB();
+
+    // Encrypt and save the school data
+//    encryptAndSave("school_data.enc");
+
+    // Clear the school data (optional)
+//    memset(&school_system, 0, sizeof(struct School));
+
+    // Read and decrypt the school data
+//    readAndDecrypt("school_data.enc");
+
+    menuDB();
+
     freePTRsDB();
     fclose(fptr);
 
     return 0;
 }
+
+
+//// Function to encrypt and save the school data to a file
+//void encryptAndSave(const char* filename) {
+//    FILE* file = fopen(filename, "wb");
+//    if (file == NULL) {
+//        printf("Error opening file for writing.\n");
+//        return;
+//    }
+//
+//    // Calculate the size of the data to be encrypted
+//    size_t data_size = sizeof(struct School);
+//
+//    // Allocate memory to store the encrypted data
+//    unsigned char* encrypted_data = (unsigned char*)malloc(data_size);
+//
+//    // Use a 256-bit key and 128-bit IV for AES-256 encryption
+//    unsigned char key[32];
+//    unsigned char iv[16];
+//    RAND_bytes(key, sizeof(key));
+//    RAND_bytes(iv, sizeof(iv));
+//
+//    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+//    EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+//
+//    // Allocate memory to store the encrypted data
+//    unsigned char* encrypted_output = (unsigned char*)malloc(data_size);
+//    int encrypted_output_size = 0;
+//
+//    // Encrypt the data and store it in the encrypted_output buffer
+//    EVP_EncryptUpdate(ctx, encrypted_output, &encrypted_output_size, (const unsigned char*)school_system._levels, sizeof(struct School));
+//
+//    // Write the key and IV to the file
+//    fwrite(key, sizeof(key), 1, file);
+//    fwrite(iv, sizeof(iv), 1, file);
+//
+//    // Write the encrypted data to the file
+//    fwrite(encrypted_output, encrypted_output_size, 1, file);
+//
+//    // Clean up
+//    EVP_CIPHER_CTX_free(ctx);
+//    free(encrypted_data);
+//    free(encrypted_output);
+//    fclose(file);
+//
+//    printf("Data encrypted and saved to %s successfully.\n", filename);
+//}
+//
+//
+//// Function to read and decrypt the school data from a file
+//void readAndDecrypt(const char* filename) {
+//    FILE* file = fopen(filename, "rb");
+//    if (file == NULL) {
+//        printf("Error opening file for reading.\n");
+//        return;
+//    }
+//
+//    // Calculate the size of the data to be read
+//    fseek(file, 0, SEEK_END);
+//    size_t data_size = ftell(file) - 32 - 16; // Subtract the size of the key and IV
+//    fseek(file, 0, SEEK_SET);
+//
+//    // Allocate memory to store the encrypted data
+//    unsigned char* encrypted_data = (unsigned char*)malloc(data_size);
+//
+//    // Read the key and IV from the file
+//    unsigned char key[32];
+//    unsigned char iv[16];
+//    fread(key, sizeof(key), 1, file);
+//    fread(iv, sizeof(iv), 1, file);
+//
+//    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+//    EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+//
+//    // Allocate memory to store the decrypted data
+//    unsigned char* decrypted_data = (unsigned char*)malloc(data_size);
+//
+//    // Decrypt the data and store it in the decrypted_data buffer
+//    int decrypted_data_size = 0;
+//    EVP_DecryptUpdate(ctx, decrypted_data, &decrypted_data_size, encrypted_data, data_size);
+//
+//    // Copy the decrypted data back to the school structure
+//    memcpy(school_system._levels, decrypted_data, decrypted_data_size);
+//
+//    // Clean up
+//    EVP_CIPHER_CTX_free(ctx);
+//    free(encrypted_data);
+//    free(decrypted_data);
+//    fclose(file);
+//
+//    printf("Data decrypted and loaded from %s successfully.\n", filename);
+//}
+
+
+
 
 // User actions in db
 void menuDB() {
@@ -132,7 +246,7 @@ void menuDB() {
                 AverageOfCourses();
                 break;
             case 8:
-                exportToCSV();
+                exportToCSV("school_data.csv");
                 break;
             case 9:
                 printf("Exiting the program.\n");
@@ -561,9 +675,45 @@ void AverageOfCourses() {
 
 }
 
-void exportToCSV() {
-    // Implement code to export the database to a CSV file
-    printf("Exporting to CSV...\n");
+// Function to export school data to a CSV file
+void exportToCSV(const char* filename) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error opening file for writing.\n");
+        return;
+    }
+
+    fprintf(file, "First Name,Last Name,Phone Number,Class Number,Class Level");
+    for (int i = 0; i < NUM_COURSES; i++) {
+        fprintf(file, ",%s", school_system._levels[0]._classes[0]._head_stud_list->_courses_list[i]._course_name);
+    }
+    fprintf(file, "\n");
+
+    // Traverse through all levels, classes, and students
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        for (int j = 0; j < NUM_CLASSES; j++) {
+            struct Class* class = &(school_system._levels[i]._classes[j]);
+            struct Student* curr_student = class->_head_stud_list;
+
+            // Traverse all students in the class
+            while (curr_student != NULL) {
+                // Write student information to the CSV file
+                fprintf(file, "%s,%s,%s,%d,%d", curr_student->_first_name, curr_student->_last_name, curr_student->_phone_number,
+                        curr_student->_class_number, curr_student->_class_level);
+
+                // Write course grades for the student
+                for (int k = 0; k < NUM_COURSES; k++) {
+                    fprintf(file, ",%d", curr_student->_courses_list[k]._grade);
+                }
+
+                fprintf(file, "\n");
+                curr_student = curr_student->_next;
+            }
+        }
+    }
+
+    fclose(file);
+    printf("Data exported to %s successfully.\n", filename);
 }
 
 
