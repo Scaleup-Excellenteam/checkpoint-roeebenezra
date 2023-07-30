@@ -1,0 +1,4 @@
+kernel module:
+	They extend the functionality of the kernel without the need to reboot the system.
+	Without modules, we would have to build monolithic kernels and add new functionality 
+	directly into the kernel image

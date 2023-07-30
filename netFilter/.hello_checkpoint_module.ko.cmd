@@ -1,0 +1,1 @@
+cmd_/home/roee/Documents/checkpoint/hello_checkpoint_module.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/roee/Documents/checkpoint/hello_checkpoint_module.ko /home/roee/Documents/checkpoint/hello_checkpoint_module.o /home/roee/Documents/checkpoint/hello_checkpoint_module.mod.o;  true

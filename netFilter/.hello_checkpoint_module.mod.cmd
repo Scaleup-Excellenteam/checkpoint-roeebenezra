@@ -1,0 +1,1 @@
+cmd_/home/roee/Documents/checkpoint/hello_checkpoint_module.mod := printf '%s\n'   hello_checkpoint_module.o | awk '!x[$$0]++ { print("/home/roee/Documents/checkpoint/"$$0) }' > /home/roee/Documents/checkpoint/hello_checkpoint_module.mod
