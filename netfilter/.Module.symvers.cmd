@@ -1,0 +1,1 @@
+cmd_/home/roee/Documents/checkpoint/Module.symvers := sed 's/ko$$/o/' /home/roee/Documents/checkpoint/modules.order | scripts/mod/modpost -m -a  -o /home/roee/Documents/checkpoint/Module.symvers -e -i Module.symvers   -T -
